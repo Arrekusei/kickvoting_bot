@@ -15,6 +15,7 @@ from telegram.ext import (
     CallbackContext
 )
 from dotenv import load_dotenv
+from flask import Flask, request
 
 # -------------------
 # 🔧 Настройка логгера
@@ -398,15 +399,29 @@ kick_handler = ConversationHandler(
 )
 
 # -------------------
+# 🌐 Flask App & Webhook
+# -------------------
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    from telegram.ext importApplicationBuilder
+    data = request.get_json(force=True)
+    update = Update.de_json(data, ApplicationBuilder().token(os.getenv("TOKEN")).build())
+    asyncio.run(app.dispatcher.process_update(update))
+    return 'ok'
+
+# -------------------
 # 🚀 Запуск бота
 # -------------------
 load_dotenv()
-app = ApplicationBuilder().token(os.getenv("TOKEN")).build()
+app.dispatcher = ApplicationBuilder().token(os.getenv("TOKEN")).build().dispatcher
 
 app.add_handler(conv_handler)
 app.add_handler(kick_handler)
 app.add_handler(CallbackQueryHandler(handle_vote))
 app.add_handler(CommandHandler('end_vote', end_vote))
 
-print("Бот запущен...")
-app.run_polling()
+if __name__ == '__main__':
+    PORT = int(os.environ.get("PORT", 80))
+    app.run(host='0.0.0.0', port=PORT)
