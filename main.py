@@ -22,7 +22,7 @@ import re
 # 🔧 Настройка логгера
 # -------------------
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
         logging.FileHandler('bot.log', encoding='utf-8'),
