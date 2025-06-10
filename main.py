@@ -405,7 +405,7 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    from telegram.ext importApplicationBuilder
+    from telegram.ext import ApplicationBuilder
     data = request.get_json(force=True)
     update = Update.de_json(data, ApplicationBuilder().token(os.getenv("TOKEN")).build())
     asyncio.run(app.dispatcher.process_update(update))
