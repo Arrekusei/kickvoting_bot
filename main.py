@@ -16,6 +16,7 @@ from telegram.ext import (
 )
 from dotenv import load_dotenv
 from flask import Flask, request
+import re
 
 # -------------------
 # 🔧 Настройка логгера
@@ -159,7 +160,7 @@ async def confirm_start(update: Update, context: CallbackContext):
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         # Отправляем сообщение с голосованием
-        chat_id = context.user_data.get('chat_id_for_vote', -1001234567890)  # заменить на реальный ID чата
+        chat_id = -1001234567890  # Заменить на реальный ID группы
         await context.bot.send_message(chat_id, f"{context.user_data['title']}\n\n{context.user_data['text']}", reply_markup=reply_markup)
 
         log_event('info', f"Голосование '{context.user_data['title']}' успешно начато в чате {chat_id}")
@@ -405,23 +406,28 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    from telegram.ext import ApplicationBuilder
     data = request.get_json(force=True)
-    update = Update.de_json(data, ApplicationBuilder().token(os.getenv("TOKEN")).build())
-    asyncio.run(app.dispatcher.process_update(update))
+    update = Update.de_json(data, application.bot)
+    asyncio.run(application.update_queue.put(update))
     return 'ok'
 
 # -------------------
 # 🚀 Запуск бота
 # -------------------
 load_dotenv()
-app.dispatcher = ApplicationBuilder().token(os.getenv("TOKEN")).build().dispatcher
 
-app.add_handler(conv_handler)
-app.add_handler(kick_handler)
-app.add_handler(CallbackQueryHandler(handle_vote))
-app.add_handler(CommandHandler('end_vote', end_vote))
+# Создание приложения
+application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 
+# Регистрация обработчиков
+application.add_handler(conv_handler)
+application.add_handler(kick_handler)
+application.add_handler(CallbackQueryHandler(handle_vote))
+application.add_handler(CommandHandler('end_vote', end_vote))
+
+# -------------------
+# 🚀 Запуск Flask
+# -------------------
 if __name__ == '__main__':
     PORT = int(os.environ.get("PORT", 80))
     app.run(host='0.0.0.0', port=PORT)
