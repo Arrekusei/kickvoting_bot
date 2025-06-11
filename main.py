@@ -1,4 +1,5 @@
 from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram import Update
 from flask import Flask, request
 import os
 import asyncio
@@ -16,7 +17,7 @@ application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 def webhook():
     data = request.get_json(force=True)
     logging.info(f"Получено: {data}")
-    update = Update.de_json(data, application.bot)
+    update = Update.de_json(data, application.bot)  # <-- теперь работает
     asyncio.run(application.update_queue.put(update))
     return 'ok'
 
