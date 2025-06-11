@@ -67,6 +67,7 @@ WAITING_FOR_FILE_OR_CONTINUE, CONFIRM_KICK = 6, 7
 # 🚀 Команда /start_vote
 # -------------------
 async def start_vote(update: Update, context: CallbackContext):
+    logging.debug("Запущена команда /start_vote")
     user_id = update.message.from_user.id
     chat_id = update.effective_message.chat_id
 
