@@ -39,7 +39,10 @@ async def handle_vote(update: Update, context):
     data = query.data
     user = query.from_user
     logging.info(f"Пользователь {user.username} ({user.id}) выбрал '{data}'")
+    # Всплывающее сообщение
     await query.answer(f"Вы выбрали: {data}")
+    # Ответ в чат
+    await query.message.reply_text(f"Ваш выбор: {data}")
 
 # -------------------
 # 📤 Регистрация обработчиков
