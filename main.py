@@ -4,14 +4,15 @@ import os
 import logging
 import asyncio
 from flask import Flask, request
+import threading
 
 # -------------------
-# 🔧 Логгер
+# 🔧 Настройка логгера
 # -------------------
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
+application = None  # Объявляем глобально
 
 # -------------------
 # 🚀 Команда /test
@@ -19,7 +20,13 @@ application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 async def test_command(update: Update, context):
     await update.message.reply_text("Бот жив!")
 
-application.add_handler(CommandHandler('test', test_command))
+# -------------------
+# 📤 Регистрация обработчиков
+# -------------------
+def setup_bot():
+    global application
+    application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
+    application.add_handler(CommandHandler('test', test_command))
 
 # -------------------
 # 🌐 Функция webhook
@@ -28,7 +35,11 @@ application.add_handler(CommandHandler('test', test_command))
 def webhook():
     data = request.get_json()
     logging.info(f"Получено: {data}")
-    
+
+    if application is None:
+        logging.error("Application не инициализирован")
+        return 'error', 500
+
     try:
         update = Update.de_json(data, application.bot)
         asyncio.run(application.update_queue.put(update))
@@ -43,21 +54,25 @@ def index():
     return "Bot is running!"
 
 # -------------------
-# 🔄 Запуск ботового цикла в отдельном потоке
+# 🔄 Запуск PTB в отдельном потоке
 # -------------------
-import threading
-
 def run_ptb_app():
-    # PTB работает в основном цикле событий
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    application.run_polling(poll_interval=0.5)  # <-- Важно!
-
-threading.Thread(target=run_ptb_app, daemon=True).start()
+    application.run_polling(poll_interval=0.5)  # <-- Не забудь удалить это позже
 
 # -------------------
-# 🚀 Запуск Flask
+# 🚀 Запуск сервиса
 # -------------------
 if __name__ == '__main__':
     PORT = int(os.environ.get("PORT", 10000))
+    
+    # Инициализация бота
+    setup_bot()
+
+    # Запуск PTB в отдельном потоке
+    ptb_thread = threading.Thread(target=run_ptb_app, daemon=True)
+    ptb_thread.start()
+
+    # Запуск Flask
     app.run(host='0.0.0.0', port=PORT)
