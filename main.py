@@ -162,6 +162,14 @@ async def confirm_start(update: Update, context: CallbackContext):
 
     return ConversationHandler.END
 
+
+#---------
+# Тест
+#---------
+
+async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Бот жив!")
+
 # -------------------
 # 🗳️ Обработка голосов
 # -------------------
@@ -416,6 +424,7 @@ application.add_handler(conv_handler)
 application.add_handler(kick_handler)
 application.add_handler(CallbackQueryHandler(handle_vote))
 application.add_handler(CommandHandler('end_vote', end_vote))
+application.add_handler(CommandHandler('test', test_command))
 
 # -------------------
 # 🚀 Запуск Flask
