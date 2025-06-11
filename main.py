@@ -24,6 +24,13 @@ async def vote_command(update: Update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Какой ваш выбор?", reply_markup=reply_markup)
 
+
+# -------------------
+# 🗳 Команда /test
+# -------------------
+async def test_command(update: Update, context):
+    await update.message.reply_text("Бот жив!")
+
 # -------------------
 # 🔄 Обработка нажатий на кнопки
 # -------------------
