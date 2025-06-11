@@ -167,8 +167,10 @@ async def confirm_start(update: Update, context: CallbackContext):
 #---------
 # Тест
 #---------
-
 async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.debug("Получена команда /test")
+    logging.debug(f"ID пользователя: {update.effective_user.id}")
+    logging.debug(f"Сообщение: {update.message.text}")
     await update.message.reply_text("Бот жив!")
 
 # -------------------
