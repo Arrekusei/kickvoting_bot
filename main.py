@@ -64,18 +64,6 @@ TITLE, TEXT, OPTIONS, DURATION, CONFIRM = range(5)
 WAITING_FOR_FILE_OR_CONTINUE, CONFIRM_KICK = 6, 7
 
 # -------------------
-# 🔄 Проверка, является ли пользователь админом
-# -------------------
-async def is_admin(bot, chat_id, user_id):
-    try:
-        members = await bot.get_chat_members(chat_id)
-        admins = [m.user.id for m in members if m.status in ['creator', 'administrator']]
-        return user_id in admins
-    except Exception as e:
-        log_event('error', f"Ошибка при получении админов: {e}")
-        return False
-
-# -------------------
 # 🚀 Команда /start_vote
 # -------------------
 async def start_vote(update: Update, context: CallbackContext):
@@ -228,7 +216,7 @@ async def end_vote(update: Update, context: CallbackContext):
                 log_event('error', f"Ошибка получения данных пользователя {user_id}: {e}")
 
     # Получение всех участников группы
-    chat_id = active_vote.get('chat_id_for_vote')
+    chat_id = -1001234567890  # Заменить на реальный ID группы
     try:
         members = await context.bot.get_chat_members(chat_id)
         all_users = [str(m.user.id) for m in members]
@@ -407,16 +395,20 @@ app = Flask(__name__)
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.get_json(force=True)
+    logging.info(f"Получено: {data}")
     update = Update.de_json(data, application.bot)
     asyncio.run(application.update_queue.put(update))
     return 'ok'
+
+@app.route('/')
+def index():
+    return "Бот жив!"
 
 # -------------------
 # 🚀 Запуск бота
 # -------------------
 load_dotenv()
 
-# Создание приложения
 application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 
 # Регистрация обработчиков
