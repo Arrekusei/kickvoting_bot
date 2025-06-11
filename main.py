@@ -1,9 +1,9 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler
-from flask import Flask, request
 import os
-import asyncio
 import logging
+import asyncio
+from flask import Flask, request
 
 # -------------------
 # 🔧 Логгер
@@ -34,7 +34,7 @@ def webhook():
         asyncio.run(application.update_queue.put(update))
         logging.debug("Сообщение добавлено в очередь")
     except Exception as e:
-        logging.error(f"Ошибка: {e}")
+        logging.error(f"Ошибка при обработке: {e}")
 
     return 'ok'
 
@@ -43,7 +43,12 @@ def index():
     return "Bot is running!"
 
 # -------------------
-# 🚀 Запуск
+# 🚀 Запуск PTB
+# -------------------
+application.start()
+
+# -------------------
+# 🚀 Запуск Flask
 # -------------------
 if __name__ == '__main__':
     PORT = int(os.environ.get("PORT", 10000))
