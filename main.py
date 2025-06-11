@@ -1,16 +1,16 @@
-from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram import Update
 import os
 import logging
-import asyncio
-from flask import Flask, request
 
 # -------------------
 # 🔧 Настройка логгера
 # -------------------
 logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__)
+# -------------------
+# 🚀 Инициализация бота
+# -------------------
 application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 
 # -------------------
@@ -19,29 +19,9 @@ application = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 async def test_command(update: Update, context):
     await update.message.reply_text("Бот жив!")
 
-# -------------------
-# 📤 Регистрация обработчиков
-# -------------------
-application.add_handler(CommandHandler('test', test_command))  # <-- Важно!
+application.add_handler(CommandHandler('test', test_command))
 
 # -------------------
-# 🌐 Функция webhook
+# 🚀 Запуск бота
 # -------------------
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    data = request.get_json()
-    logging.info(f"Получено: {data}")
-    update = Update.de_json(data, application.bot)
-    asyncio.run(application.update_queue.put(update))
-    return 'ok'
-
-@app.route('/')
-def index():
-    return "Bot is running!"
-
-# -------------------
-# 🚀 Запуск сервиса
-# -------------------
-if __name__ == '__main__':
-    PORT = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=PORT)
+application.run_polling()
