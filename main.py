@@ -4,7 +4,9 @@ import os
 import asyncio
 import logging
 
-# Настройка логгера
+# -------------------
+# 🔧 Настройка логгера
+# -------------------
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
@@ -22,12 +24,20 @@ def webhook():
 def index():
     return "Бот жив!"
 
-# Тестовая команда
-async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# -------------------
+# 🚀 Команда /test
+# -------------------
+async def test_command(update, context):
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+    logging.debug(f"Пользователь {user.username} ({user.id}) написал /test")
     await update.message.reply_text("Бот жив!")
 
 application.add_handler(CommandHandler('test', test_command))
 
+# -------------------
+# 🚀 Запуск Flask
+# -------------------
 if __name__ == '__main__':
     PORT = int(os.environ.get("PORT", 80))
     app.run(host='0.0.0.0', port=PORT)
