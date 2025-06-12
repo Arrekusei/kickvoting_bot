@@ -1,3 +1,2 @@
 python-telegram-bot>=20.10
-python-dotenv
-flask
+
